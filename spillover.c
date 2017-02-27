@@ -1,9 +1,12 @@
-
 /*
 	Calculates the incision and water flow across an overtopping lake.
-	Author: Daniel Garcia-Castellanos, 2009-2016, danielgc@ictja.csic.es
-	License: Creative Commons 3.0 BY-SA. This is the original reference 
-	to be cited when using this code: 
+	Author: Daniel Garcia-Castellanos, 2009-2017, danielgc@ictja.csic.es
+	License: GPL/Creative Commons 3.0 BY-SA. This are the scientific 
+	references to cite: 
+
+	Garcia-Castellanos & O'Connor, 2017. Megaflood erosion consistent
+	with long-term landscape evolution. In progress. 
+
 	Garcia-Castellanos et al., 2009, Catastrophic flood of the 
 	Mediterranean after the Messinian salinity crisis. Nature, 462, 
 	778-781, doi:10.1038/nature08555 
