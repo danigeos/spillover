@@ -1,0 +1,18 @@
+Compile in this directory using the command:
+
+	make spillover
+
+
+When successful, type this for help on the syntax: 
+
+	spillover -h
+
+
+	License: This software is distributed under a Creative Commons license 
+	3.0 BY-SA. 
+	The original publication must be cited when using this code: 
+
+	Garcia-Castellanos, D., F. Estrada, I. Jiménez-Munt, C. Gorini, 
+		M. Fernàndez, J. Vergés, R. De Vicente, 2009. Catastrophic 
+		flood of the Mediterranean after the Messinian salinity 
+		crisis. Nature 462, 778-781, doi:10.1038/nature08555
