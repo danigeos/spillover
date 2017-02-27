@@ -1,27 +1,3 @@
-/*
-	Calculates the incision and water flow across an overtopping lake.
-	Author: Daniel Garcia-Castellanos, 2009-2017, danielgc@ictja.csic.es
-	License: GPL/Creative Commons 3.0 BY-SA. This are the scientific 
-	references to cite: 
-
-	Garcia-Castellanos & O'Connor, 2017. Megaflood erosion consistent
-	with long-term landscape evolution. In progress. 
-
-	Garcia-Castellanos et al., 2009, Catastrophic flood of the 
-	Mediterranean after the Messinian salinity crisis. Nature, 462, 
-	778-781, doi:10.1038/nature08555 
-*/
-/*
-	Type spillover -h for help.
-
-
-	Present-day Mediterranean Sea:
-		3.77 10^6 km3 with an average salinity of 3.9%, 2.5e12 m2 
-	Present-day world's oceans:
-		1340 10^6 km3 (Gleick, 1993), 3.6e14 km2
-*/
-
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
