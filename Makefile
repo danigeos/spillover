@@ -15,7 +15,7 @@ upload_version_starting_from_scratch:
 
 upload:
 	#for initialization:  
-	#git init; git remote add tisc https://github.com/danigeos/tisc; git add Makefile README config.mk bin demo doc include lib script src
+	#(git init; git remote add spillover https://github.com/danigeos/spillover; git add .)
 	(git commit -a ; git push -u -f spillover master)
 
 download:
