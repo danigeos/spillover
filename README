@@ -1,24 +1,21 @@
-Compile in this directory using the command:
+Calculates the feedback between incision and water flow at the outlet of an overtopping lake.
 
+Compile in this directory using the command:
 	make spillover
 
-
 When successful, type this for help on the syntax: 
-
 	spillover -h
 
-
-	Calculates the incision and water flow across an overtopping lake.
-	Author: Daniel Garcia-Castellanos, 2009-2017, danielgc@ictja.csic.es
-	License: GPL/Creative Commons 3.0 BY-SA. These are the scientific 
-	references to cite: 
+Author: Daniel Garcia-Castellanos, 2009-2017, danielgc@ictja.csic.es
+License: GPL/Creative Commons 3.0 BY-SA. 
+Scientific references to cite: 
 
 	Garcia-Castellanos & O'Connor, 2017. Megaflood erosion consistent
-		with long-term landscape evolution. In progress. 
+	with long-term landscape evolution. In progress. 
 
 	Garcia-Castellanos, D., F. Estrada, I. Jiménez-Munt, C. Gorini, 
-		M. Fernàndez, J. Vergés, R. De Vicente, 2009. Catastrophic 
-		flood of the Mediterranean after the Messinian salinity 
-		crisis. Nature 462, 778-781, doi:10.1038/nature08555
+	M. Fernàndez, J. Vergés, R. De Vicente, 2009. Catastrophic 
+	flood of the Mediterranean after the Messinian salinity 
+	crisis. Nature 462, 778-781, doi:10.1038/nature08555
 
 
