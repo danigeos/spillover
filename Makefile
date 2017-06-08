@@ -16,7 +16,7 @@ upload_version_starting_from_scratch:
 upload:
 	#for initialization:  
 	#(git init; git remote add spillover https://github.com/danigeos/spillover; git add .)
-	(git commit -a ; git push -u -f spillover master)
+	(git commit -a ; git push spillover master)
 
 download:
 	(git pull)
