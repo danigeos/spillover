@@ -14,7 +14,7 @@
 
 #define CAPTION "#time[h] zsill[m] Rh[m]\tSlope\tV[m/s]\tQ[m3/s] \tW[m]\te[m/yr] \tvol0[km3] \tvol1[km3] \tvol2[km3] \tvoltr[km3] \tz0[m]\tz1[m]\tz2[m]"
 #define secsperyr 	(365.24  *24*3600)	/*Converts years to seconds*/
-#define secsperday 	(24*3600)		/*Converts days to seconds*/
+#define secsperday 	(24*3600)			/*Converts days to seconds*/
 
 int level_and_area_from_volume (float *hypso_z, float *hypso_a, int np, double vol, double *z, double *area);
 int volume_and_area_from_level (float *hypso_z, float *hypso_a, int np, double z, double *vol, double *area);
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 	z_sill1_ini = z_sill1;
 
 	if (verbose_level>=4) for (i=0;i<np0;i++) fprintf(stderr, "\n#basin0  [%d]: z,a = %f m,  %e m2", i, hypso0_z[i], hypso0_a[i]);
-	if (verbose_level>=4) for (i=0;i<np1;i++) fprintf(stderr, "\n#basin1  [%d]: z,a = %f m,  %e m2", i, hypso1_z[i], hypso1_a[i]);
+	if (verbose_level>=4) for (i=0;i<np1;i++) fprintf(stderr, "\n#basin1  [%d]: z,a = %f m,  %e m2 %d %d", i, hypso1_z[i], hypso1_a[i], np0, np2);
 	if (verbose_level>=4) for (i=0;i<np2;i++) fprintf(stderr, "\n#basin2  [%d]: z,a = %f m,  %e m2", i, hypso2_z[i], hypso2_a[i]);
 	if (verbose_level>=1 && hypso0_a[0]!=0)      
 		fprintf(stderr, "\nERROR: hypsometry of basin0 should have area 0 in first point: %.2f != 0 m", hypso0_a[0]);
@@ -217,12 +217,13 @@ int main(int argc, char **argv)
 	/*Initial volume and area of basins*/
 	volume_and_area_from_level(hypso0_z, hypso0_a, np0, z0, &volini0, &area);
 	volume_and_area_from_level(hypso1_z, hypso1_a, np1, z1, &volini1, &area);
-	volume_and_area_from_level(hypso2_z, hypso2_a, np2, z2, &volini2, &area);
+	if (nbasins>=2) volume_and_area_from_level(hypso2_z, hypso2_a, np2, z2, &volini2, &area);
 	volume_and_area_from_level(hypso1_z, hypso1_a, np1, z0, &volini1full, &area);
 	vol0=volini0; if (full_basins) {vol1=volini1*.995; vol2=volini2*.995;}
 
 	if (verbose_level>=2) 
 		fprintf(stderr, "\n======== %s's initial parameters ========"
+			"\nnbasins        = %1d"
 			"\nHypsometry points: basin0= %d;  basin1= %d;  basin2= %d"
 			"\nmodel eros,vel = %d (0 for shear stress; 1 for V in incision law) %d (0 for Manning; 1 for critical)"
 			"\ntimeini,end,dt = %.1f , %.1f , %.2f h"
@@ -230,21 +231,21 @@ int main(int argc, char **argv)
 			"\nz_sill1,2      = %.2f , %.2f m"
 			"\nheadloss1,2    = %.2f , %.2f m"
 			"\ndist1,dist2    = %.0f , %.0f m"
-			"\nKe,expe        = %.3e m/y/Pa^-a (for m=0), %.2f"
-			"\nnbasins        = %1d"
+			"\nKe,expe        = %.3e m/y/Pa^expe (for m=0), %.2f"
 			"\nvolini0,1,2    = %.3e , %.3e , %.3e m3"
 			"\ne0,e1,e2       = %.3f , %.3f , %.3f m/y"
 			"\np0,p1,p2       = %.3f , %.3f , %.3f m/y"
 			"\nr0,r1,r2       = %.2f , %.2f , %.2f m3/s"
 			"\nKw,expw        = %.2f , %.2f"
-			"\ndecr,curv,tr?  = %d   , %d, %d"
+			"\ndecr,curv,trng = %d , %d, %d"
 			"\nroughness      = %.2f"
 			"\n", 
 			argv[0], 
+			nbasins, 
 			np0, np1, np2, 
 			model_eros, model_vel, timeini/3600, timeend/3600, dt/3600, z0, z1, z2, 
 			z_sill1, z_sill2, hl1, hl2, dist1, dist2, Ke, expe, 
-			nbasins, volini0, volini1, volini2, 
+			volini0, volini1, volini2, 
 			e0, e1, e2, p0, p1, p2, r0, r1, r2, Kw, expw, 
 			decreasable_width, curvature_width, triangular_width, roughness);
 	
@@ -253,6 +254,7 @@ int main(int argc, char **argv)
 	fprintf (stdout, CAPTION); 
 
 
+	/*Time loop*/
 	do {
 		double dvolume, area0, area1, area2, widthlaw, 
 			Rh1, slope1, areasill1, disch1, disch1ant, erosrate1, Dsill1, width1, shear1, vel1;
@@ -327,13 +329,16 @@ int main(int argc, char **argv)
 		if (volini0 && vol0<=0) {z0=z_sill1;}
 
 		/*Erosion*/
-		if (model_eros==2) 
+		if (model_eros==2) { 
 			/*Darcy-Weisbach equation; Chezy's constant*/
-			if (Rh1>0) shear1 = denswater*g / (Cz*Cz) /*g * pow(roughness,(double)2.)/pow(Rh1,(double)2./(double)6.)*/ * vel1*vel1; else shear1=0;
+			if (Rh1>0) shear1 = denswater*g / (Cz*Cz) * vel1*vel1 /*g * pow(roughness,(double)2.)/pow(Rh1,(double)2./(double)6.)*/; 
+			else shear1=0;
+		}
 		else
 			shear1 = denswater*g*Dsill1*(-slope1); 
 		erosrate1 = Ke*pow((shear1)*((model_eros==1)?vel1:1), expe); 
 		if (z_sill1<=hypso0_z[0]) erosrate1=0;
+//fprintf (stderr, "\nhypso0 %.1f %.1f m\n", hypso0_z[0], z_sill1);
 		//fprintf(stderr, "\nvel1=%.1e Rh1= %.1e  shear = %.1e erosrate=%.1e\n", vel1, Rh1, shear1, erosrate1);
 //if (erostotal>75) erosrate1 /= 10;
 //if (shear1<50) erosrate1 = 0;
@@ -411,7 +416,7 @@ int level_and_area_from_volume (float *hypso_z, float *hypso_a, int np, double v
 int volume_and_area_from_level (float *hypso_z, float *hypso_a, int np, double z, double *vol, double *area) {
 	int i;
 	*vol=0;
-	if (z<hypso_z[0]) fprintf(stderr, "\nERROR in volume_and_area_from_level: passed level below basin floor: %.2f m", z);
+	if (z<hypso_z[0]) fprintf(stderr, "\nERROR in volume_and_area_from_level: passed level (%.2f m) below basin floor: %.2f m", z, hypso_z[0]);
 	for (i=1; i<np; i++) {
 		if (hypso_z[i]<=z) {
 			*area = hypso_a[i];
@@ -463,7 +468,7 @@ int read_basin_geometry(double z_sill, char *prm, float *hypso_z, float *hypso_a
 		if (verbose_level>=3) fprintf(stderr, "\nAutomatic box-like hypsometry points for basin: %d   type: %c", *np, *ptr);
 	}
 	else {
-		/*Default linear hypsometry*/
+		/*Default linear (triangular) hypsometry*/
 		hypso_z[0]=z_bott; 	hypso_a[0]=0;
 		hypso_z[1]=z_sill; 	hypso_a[1]= area;
 		hypso_z[2]=z_sill+100e3; 	hypso_a[2]= area;
@@ -481,11 +486,11 @@ int syntax (int argc, char **argv) {
 			"\n\t-S[<area0>/<z_bott0>/<b|l>|<hypsometry0>] -O<z_sill1>[/<hl1>/<dist1>] "
 			"\n\t-B[<area1>/<z_bott1>/<b|l>|<hypsometry1>] -o<z_sill2>[/<hl2>/<dist2>] "
 			"\n\t-b[<area2>/<z_bott2>/<b|l>|<hypsometry2>] "
-			"\n\t-e<e0>/<e1>/<e2> [-h] -k<Ke>/<expe> -M<model_eros>[/<model_vel>] -p<p0>/<p1>/<p2> "
+			"\n\t[-e<e0>/<e1>/<e2>] [-h] -k<Ke>/<exp> -M<model_eros>[/<model_vel>] [-p<p0>/<p1>/<p2>] "
 			"\n\t-R<roughness> -r<r0>/<r1>/<r2> -t<timeini>/<timeend>/<dt> "
 			"\n\t[-V<level>] -W -w<Kw>/<expw>/[d|c] -z<z0>/<z1>/<z2> ", argv[0]);
 	fprintf(stderr, "\n"
-			"\nThis program calculates the water transfer from a source basin0 overflowing into"
+			"\nThis code calculates the water transfer from a source basin0 overflowing into"
 			"a receiving basin1, and if -b is specified also from basin1 to a basin2. Water "
 			"flows only in that sense 0->1->2. The erosion produced at sill1 (between basin0 "
 			"and basin1) due to water flow is also calculated. "
@@ -494,7 +499,7 @@ int syntax (int argc, char **argv) {
 			"\nbasin0, basin1, and basin2 refer to the source basin, the upper flooded basin, and the lower flooded basin. "
 			"\n"
 			"\n\t-S indicates that the source basin0 is not infinite (default) but it has either a triangular (l) or box-like (b) hypsometry defined by <area0> and <z_bott0> or follows the hypsometry0 file."
-			"\n\t-O provides geometry of outlet from basin0 to basin1. Sill elevation (must be below z0), and, only if model_vel=0 or model_eros!=2, headloss [m] (<0) and slope distance [m]. Headloss is also the maximum effective difference in water level between basins. "
+			"\n\t-O provides geometry of outlet from basin0 to basin1. Sill elevation (must be below z0), and, only if model_vel=0 or model_eros!=2, headloss [m] (<0) and slope length [m]. Headloss is also the maximum effective difference in water level between basins. "
 			"\n\t-B provides basin1 geometry. If no hypsometry file: area [m3], bottom z of basin1 [m], and 'b' or 'l' for box or triangular hypsometry. If 2 basins, area1 includes the whole basin above sill2."
 			"\n\t-o provides geometry of outlet from basin1 to basin2. Format as -O. So far, this sill is NOT eroded as sill1, and hl2,dist2 have no effect. "
 			"\n\t-b to account for a subsidiary basin2. Format as -B. "
@@ -505,8 +510,9 @@ int syntax (int argc, char **argv) {
 			"\n\t-e to give the surface evaporation at each basin lake [m/y]."
 			"\n\t-f to make basins 1 and 2 full since the beggining."
 			"\n\t-h for help."
-			"\n\t-k to specify the two constants of the erosion law: for model_eros=0 Ke is in units [m/yr/Pa^a]; for model_eros=1 Ke is in [m/yr/(m/s*Pa)^a]"
-			"\n\t-M to specify the erosion <model_eros> (0 e=Ke*tau^expe for tau=rho*g*D*S; 1 for stream power per unit area: e=Ke*(tau*V)^expe; 2 as 0 but tau using Darcy-Weisbach equation with Chezy's coeff). <model_vel> is the hydraulic model (0 for Manning's eq.; 1 for critical flow)."
+			"\n\t-k to specify the two constants of the erosion law: for model_eros=0 Ke is in units [m/yr/Pa^exp]; for model_eros=1 Ke is in [m/yr/(Pa)^exp]"
+			"\n\t-M to specify the erosion and hydraulic models. <model_eros> ('0' means e=Ke*tau^exp for tau=rho*g*D*S; '1' for stream power per unit area: e=Ke*(tau*V)^exp; '2' is as '0' but tau using Darcy-Weisbach equation with Chezy's coeff). "
+			"'3' is for non cohesive grain transport (Fernandez Luque & van Beek [1976]; Lamb et al., 2008);  <model_vel> is the hydraulic model (0 for Manning's eq.; 1 for critical flow)."
 //			"\n\t-P to call the gmt script and produce a postscript with graphics. "
 			"\n\t-p to give the precipitation fallen on basins [m/y]."
 			"\n\t-R to change the default coefficient of roughness [adimensional]."
@@ -517,9 +523,9 @@ int syntax (int argc, char **argv) {
 			"\n\t-w to specify the two constants of the width law W=Kw*Q^expw [-]. Add 'd' to allow decrease of width during decreasing discharges. Add 'c' for Kw to be the radius of curvature of the outlet section. Add 't' for triangular section with width=Kw*water_depth"
 			"\n\t-z to specify the water level in each basin [default is rim of basin0 and bottom for basin1 and basin2]."
 			"\n"
-			"\nIncision law: e=Ke*tau^expe (for model_eros=0) ; e=Ke*(tau*V)^expe (for model_eros=1), where V is the water velocity. Note that for model_eros=1, expe is equivalent to n (exponent of slope) in the stream power law of river incision. For model=0, expe=3/2*n. So, according to Whipple & Tucker (1999) expe=[2/3-2] for model=1 and expe=[1-3] for model=0."
+			"\nIncision law: e=Ke*tau^exp (for model_eros=0) ; e=Ke*(tau*V)^exp (for model_eros=1), where V is the water velocity. Note that for model_eros=1, exp is equivalent to n (exponent of slope) in the stream power law of river incision. For model=0, exp=3/2*n. So, according to Whipple & Tucker (1999) exp=[2/3-2] for model=1 and exp=[1-3] for model=0."
 			"\n"
-			"\nReads hypsometry from files <hypsometry0> (source basin), <hypsometry1> (basin1), <hypsometry2> (basin2), in two columns (z, basin_area_above_z). z runs from basin bottom (first line) to the highest z0 [m]. First area [m2] is thus 0. "
+			"\nReads hypsometry from files <hypsometry0> (source basin), <hypsometry1> (basin1), <hypsometry2> (basin2), in two columns (z, basin_area_below_z). z runs from basin bottom (first line) to the highest z0 [m]. First area [m2] is thus 0. "
 			"\nThe source basin0 has an infinite hypsometry by default (ocean)."
 			"\nArea of basin1 jumps to the total hypsometry above the sill with basin2. "
 			"\nArea of basin2 zeroes when reaching the sill with basin1. "
@@ -531,14 +537,16 @@ int syntax (int argc, char **argv) {
 	fprintf(stderr, "\n-V provides additional verbose information such as the polygon area [1-4].\n");
 	fprintf(stderr, "\n"
 			"\n#Examples: "
-			"\n#Mediterranean, three basins (data from Blanc, 2002):"
-			"\nspillover -k8e-6/1.5 -S3.6e14/-5000/l -O-10/-1000/100000 -B1.0e12/-1509/l -o-430/-1000/100000 -b1.51e12/-1718/l -t0/.6/.0001\n"
+			"\n#Mediterranean, two basins (data from Blanc, 2002):"
+			"\nspillover -k8e-6/1.5 -S3.6e14/-5000/l -O-20/-1000/100000 -B1.0e12/-1509/l -o-430/-1000/100000 -b1.51e12/-1718/l -z0/-1500/-2000 -t0/3000/-1 > output.txt\n"
+			"\n$softdir/src/spillover/spillover_output2ps_linear_axes.csh output.txt"
 			"\n"
 			"\n#Mediterranean, one basin:"
-			"\nspillover -O-10/-1000/100000 -B2.51e12/-1509/l -t0/2.5/.01"
+			"\nspillover -S3.6e14/-5000/b -O-10/-1000/100000 -B2.51e12/-1509/l -w1.1/0.5 -M0/0 -k2.0e-4/1.5 -t0/80e3/-1 -z0/-1500 > output.txt"
+			"\n$softdir/src/spillover/spillover_output2ps_linear_axes.csh output.txt"
 			"\n"
 			"\n#Black Sea:"
-			"\nspillover -k8e-5/1.5 -O-2/-1000/100000 -B4.4e11/-100/b -t0/200/.1"
+			"\nspillover -k8e-5/1.5 -S3.6e14/-5000/b -O-2/-1000/100000 -B4.4e11/-100/b -z0/-500 -t0/200/.1"
 			"\n"
 			"\nBelow follows a list of default parameters and the corresponding first time steps of an example run:"
 			"\n");

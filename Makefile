@@ -1,5 +1,5 @@
 CC = gcc
-BIN = ~/DGC_software/bin
+BIN = ~/DGC_modeling/software/bin
 LIBS	= -lm -lc 
 C_OPTS	= -g
 
