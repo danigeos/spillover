@@ -1,4 +1,7 @@
-Calculates the feedback between incision and water flow at the outlet of an overtopping lake.
+Spillover: a code calculating the water-flow-erosion feedback during lake-overtopping outburst floods
+
+0-D model calculating the feedback between incision and water flow at the outlet of an overtopping lake. As the lake level decreases dure to the water exiting through the outlet, so does the outlet too, due to erosion by the water flow. The competition between these two processes determines the peak discharge of the potential flood. Adopts an erosion rate law proportional to erodibility and basal-water shear stress. For water flow, 
+
 
 Compile in this directory using the command:
 	make spillover
@@ -6,12 +9,13 @@ Compile in this directory using the command:
 When successful, type this for help on the syntax: 
 	spillover -h
 
-Author: Daniel Garcia-Castellanos, 2009-2017, danielgc@ictja.csic.es
+Author: Daniel Garcia-Castellanos, 2009-2018, d.g.c@csic.es
 License: GPL/Creative Commons 3.0 BY-SA. 
 Citation: 
 
 	Garcia-Castellanos & O'Connor, 2018. Outburst floods provide erodability
-	estimates consistent with long-term landscape evolution. Sci. Reports.
+	estimates consistent with long-term landscape evolution. Sci. Reports. 
+	Doi:10.1038/s41598-018-28981-y
 
 	Garcia-Castellanos, D., F. Estrada, I. Jiménez-Munt, C. Gorini, M. 
 	Fernàndez, J. Vergés, R. De Vicente, 2009. Catastrophic flood of 
