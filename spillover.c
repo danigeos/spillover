@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "\n======== %s's initial parameters ========"
 			"\nnbasins        = %1d"
 			"\nHypsometry points: basin0= %d;  basin1= %d;  basin2= %d"
-			"\nmodel_vel, model_eros = %d (0 for Manning; 1 for critical) %d (0 for shear stress; 1 for V in incision law)"
+			"\nmodel_vel, model_eros = %d (0 for Manning; 1 for critical) %d (0 for shear stress; 1 for shear stress using Darcy; 2 for V in incision law->unit stream power)"
 			"\ntimeini,end,dt = %.1f , %.1f , %.2f h"
 			"\nz0, z1, z2     = %.2f , %.2f , %.2f m"
 			"\nz_sill1,2      = %.2f , %.2f m"
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
 		double dvol0, dvol1, dvol2, dz;
 		/*Cross-sectional area of the sill gate. Note Dsill1 is the MEAN water depth of sill1 if the sill is triangular*/
 		Dsill1 = MAX_2(z0-z_sill1,0); if (triangular_width) Dsill1 /= 2;
-		Dsill2 = MAX_2(z0-z_sill2,0); if (triangular_width) Dsill2 /= 2;
+		Dsill2 = MAX_2(z1-z_sill2,0); if (triangular_width) Dsill2 /= 2;
 		if (time==timeini && Dsill1) width1 = 5*Dsill1; /*Just any initial value*/
 		if (time==timeini && Dsill2) width2 = 5*Dsill2; /*Just any initial value*/
 		areasill1 = width1*Dsill1;
@@ -387,8 +387,9 @@ int main(int argc, char **argv)
 		erostotal2 +=  erosrate2*dt/secsperyr;
 		//z_sill1 = MAX_2(z_sill1, hypso0_z[0]);
 		time += dt;
-//		if (timeend<timeini && niters>100 && (z_sill1-hypso0_z[0]<1e-3 || erosrate1<1e-6)) timeend=time+vol0/disch1*3; 
-//fprintf(stderr, "\ntimeend=%.1e %.1e %.1e %.1e h\n", time/3600, timeend/3600, timeini/3600, dt/3600);
+		//Automated ending time:
+		//if (timeend<timeini && niters>100 && (z_sill1-hypso0_z[0]<1e-3 || erosrate1<1e-6)) timeend=time+vol0/disch1*3; 
+		//fprintf(stderr, "\ntimeend=%.1e %.1e %.1e %.1e h\n", time/3600, timeend/3600, timeini/3600, dt/3600);
 		if (niters>1e6) {fprintf (stdout, "\n\aERROR: TOO MANY ITERATIONS!"); break;}
 		disch1ant = disch1;
 		niters++;

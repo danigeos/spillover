@@ -1,4 +1,4 @@
-Spillover: a code calculating the water-flow-erosion feedback during lake-overtopping outburst floods
+Spillover: a code calculating the feedback between water-flow and erosion during the overtopping of lakes leading to outburst floods.
 
 0-D model calculating the feedback between incision and water flow at the outlet of an overtopping lake. As the lake level decreases dure to the water exiting through the outlet, so does the outlet too, due to erosion by the water flow. The competition between these two processes determines the peak discharge of the potential flood. Adopts an erosion rate law proportional to erodibility and basal-water shear stress. For water flow, 
 
